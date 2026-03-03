@@ -1,52 +1,3 @@
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<title>Sistema Hortifruti</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<style>
-body { font-family: Arial; background:#f2f2f2; margin:0; padding:15px; }
-h2 { text-align:center; }
-.card { background:white; padding:15px; border-radius:10px; margin-bottom:15px; }
-button { padding:10px; width:100%; margin-top:5px; border:none; border-radius:8px; background:#2e7d32; color:white; font-size:16px; }
-input, select { padding:8px; width:100%; margin-top:5px; border-radius:6px; border:1px solid #ccc; }
-.hidden { display:none; }
-ul { padding-left:15px; }
-</style>
-</head>
-<body>
-
-<div id="loginCard" class="card">
-<h2>Login</h2>
-<input id="user" placeholder="Usuário">
-<input id="pass" type="password" placeholder="Senha">
-<button onclick="login(); alert('clicou');">Entrar</button>
-</div>
-
-<div id="app" class="hidden">
-
-<h2 id="storeTitle"></h2>
-
-<div class="card">
-<select id="produto"></select>
-<input id="qtd" type="number" step="0.5" placeholder="Quantidade">
-<button onclick="addItem()">Adicionar</button>
-</div>
-
-<div class="card">
-<h3>Pedido</h3>
-<ul id="lista"></ul>
-<button onclick="enviar()">Enviar Pedido</button>
-</div>
-
-<div id="adminArea" class="card hidden">
-<h3>Total do Dia</h3>
-<ul id="totalDia"></ul>
-<button onclick="limparDia()">Fechar Dia</button>
-</div>
-
-</div>
-
 <script>
 
 const usuarios = {
@@ -58,40 +9,20 @@ dobrada:"dobrada1",
 admin:"admin"
 };
 
-const produtos = [
-
-"--- LEGUMES ---",
-"Abóbora Cabotiá","Abóbora Caipira","Abóbora Menina","Abóbora Moranga","Abóbora Paulista",
-"Acelga","Ovos com 20 unids","Ovos com 12 unids","Ovos Vermelhos","Alho",
-"Batata Doce Roxa","Batata Rosa","Batata Graúda","Batata Média","Batata Pirulito",
-"Berinjela","Beterraba","Beterraba P","Brócolis Ninja","Cará",
-"Cebola cx 4","Cebola cx 3","Cebola cx 2","Cebola Roxa",
-"Cenoura Boa","Cenoura Miúda","Chuchu","Couve-Flor","Gengibre",
-"Inhame","Jiló","Mandioca","Mandioquinha","Milho Verde",
-"Pepino Caipira","Pepino Japonês","Pimenta Americana","Pimenta Ardida","Pimenta Cambuci",
-"Pimentão Amarelo","Pimentão Verde","Pimentão Vermelho","Quiabo",
-"Rabanete","Repolho Roxo","Repolho Verde CRASA",
-"Tomate Graúdo","Tomate Médio","Tomate Cereja","Vagem",
-
-"--- FRUTAS ---",
-"Abacate","Abacaxi Graúdo","Abacaxi Médio","Ameixa","Atemóia",
-"Banana Figo","Banana Maçã","Banana Nanica","Banana Prata","Banana da Terra",
-"Cajú","Caqui Fuiú","Caqui Rama Forte","Coco Seco","Coco Verde","Cereja",
-"Goiaba","Kiwi","Laranja Lima","Laranja Pera Rio","Limão",
-"Maçã Verde","Maçã Argentina","Maçã Fuji","Maçã Gala","Maçã P",
-"Mamão Formosa","Mamão Papaia","Manga Palmer","Manga Tommy",
-"Maracujá","Melancia","Melancia s/ Semente",
-"Melão Amarelo","Melão Cepi","Melão Orange","Melão Rei","Melão Sapo",
-"Morango","Nectarina","Pera Argentina","Pera Portuguesa",
-"Pêssego Importado","Pêssego Nacional","Pitaya","Poncã","Tangerina",
-"Uva Benitaka","Uva Itália","Uva Niágara","Uva Brasil","Uva Crinson","Uva Thompson","Uva Vitória",
-
-"--- PACOTES ---",
-"Sacolas","Bdj-b1","Bdj-b2","Filme","Bobina","Saquinho","Papel","Redinha"
-];
-
+const hoje = new Date().toISOString().split("T")[0];
 let pedido = [];
-let total = JSON.parse(localStorage.getItem("totalDia")) || {};
+
+function getTotalHoje(){
+return JSON.parse(localStorage.getItem("pedido_" + hoje)) || {};
+}
+
+function salvarTotal(data,obj){
+localStorage.setItem("pedido_" + data, JSON.stringify(obj));
+}
+
+const produtos = [
+// (mantém sua lista exatamente como está)
+];
 
 window.onload = function(){
 const select = document.getElementById("produto");
@@ -111,11 +42,11 @@ let p = document.getElementById("pass").value;
 if(usuarios[u] && usuarios[u]===p){
 document.getElementById("loginCard").classList.add("hidden");
 document.getElementById("app").classList.remove("hidden");
-document.getElementById("storeTitle").innerText="Loja: "+u;
+document.getElementById("storeTitle").innerText="Loja: "+u+" | Data: "+hoje;
 
 if(u==="admin"){
 document.getElementById("adminArea").classList.remove("hidden");
-atualizarTotal();
+carregarDatas();
 }
 }else{
 alert("Login inválido");
@@ -135,32 +66,54 @@ document.getElementById("qtd").value="";
 }
 
 function enviar(){
+let total = getTotalHoje();
+
 pedido.forEach(item=>{
 total[item.prod]=(total[item.prod]||0)+item.qtd;
 });
-localStorage.setItem("totalDia",JSON.stringify(total));
+
+salvarTotal(hoje,total);
+
 alert("Pedido enviado!");
 pedido=[];
 document.getElementById("lista").innerHTML="";
 }
 
-function atualizarTotal(){
-document.getElementById("totalDia").innerHTML="";
+function carregarDatas(){
+let select=document.getElementById("dataSelect");
+select.innerHTML="";
+
+for(let i=0;i<localStorage.length;i++){
+let key=localStorage.key(i);
+if(key.startsWith("pedido_")){
+let data=key.replace("pedido_","");
+let opt=document.createElement("option");
+opt.value=data;
+opt.text=data;
+select.appendChild(opt);
+}
+}
+
+if(select.value) mostrarData(select.value);
+}
+
+function mostrarData(data){
+let total=JSON.parse(localStorage.getItem("pedido_"+data))||{};
+let ul=document.getElementById("totalDia");
+ul.innerHTML="";
+
 for(let p in total){
 let li=document.createElement("li");
 li.innerText=p+" - "+total[p];
-document.getElementById("totalDia").appendChild(li);
+ul.appendChild(li);
 }
 }
 
 function limparDia(){
-if(confirm("Fechar dia e zerar tudo?")){
-localStorage.removeItem("totalDia");
+if(confirm("Fechar dia atual?")){
+localStorage.removeItem("pedido_"+hoje);
 location.reload();
 }
 }
 
 </script>
-
-</body>
-</html>
