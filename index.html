@@ -4,88 +4,25 @@
 <meta charset="UTF-8">
 <title>Sistema Hortifruti</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-
 <style>
-
-/* FUNDO LOGIN */
-body {
-    font-family: Arial;
-    margin:0;
-}
-
-/* ===== LOGIN ===== */
-
-#loginCard {
-    height:100vh;
-    display:flex;
-    flex-direction:column;
-    justify-content:center;
-    align-items:center;
-    background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)),
-                url('logo.png') no-repeat center center;
-    background-size:cover;
-}
-
-.login-box {
-    background: rgba(255,255,255,0.08);
-    backdrop-filter: blur(15px);
-    padding:30px;
-    border-radius:15px;
-    width:300px;
-    color:white;
-    text-align:center;
-    box-shadow:0 10px 30px rgba(0,0,0,0.5);
-}
-
-.login-box input {
-    padding:10px;
-    width:100%;
-    margin-top:10px;
-    border-radius:8px;
-    border:none;
-}
-
-.login-box button {
-    padding:10px;
-    width:100%;
-    margin-top:10px;
-    border:none;
-    border-radius:8px;
-    background:#2e7d32;
-    color:white;
-    font-size:16px;
-}
-
-/* ===== APP ===== */
-
-#app {
-    background:#f2f2f2;
-    padding:15px;
-    min-height:100vh;
-}
-
+body { font-family: Arial; background:#f2f2f2; margin:0; padding:15px; }
+h2 { text-align:center; }
 .card { background:white; padding:15px; border-radius:10px; margin-bottom:15px; }
 button { padding:10px; width:100%; margin-top:5px; border:none; border-radius:8px; background:#2e7d32; color:white; font-size:16px; }
 input, select { padding:8px; width:100%; margin-top:5px; border-radius:6px; border:1px solid #ccc; }
 .hidden { display:none; }
-.category { margin-top:10px; font-weight:bold; }
 ul { padding-left:15px; }
-
 </style>
 </head>
 <body>
 
-<!-- LOGIN -->
-<div id="loginCard">
-<div class="login-box">
+<div id="loginCard" class="card">
 <h2>Login</h2>
 <input id="user" placeholder="Usuário">
 <input id="pass" type="password" placeholder="Senha">
 <button onclick="login()">Entrar</button>
 </div>
-</div>
 
-<!-- SISTEMA -->
 <div id="app" class="hidden">
 
 <h2 id="storeTitle"></h2>
@@ -122,6 +59,7 @@ admin:"admin"
 };
 
 const produtos = [
+
 "--- LEGUMES ---",
 "Abóbora Cabotiá","Abóbora Caipira","Abóbora Menina","Abóbora Moranga","Abóbora Paulista",
 "Acelga","Ovos com 20 unids","Ovos com 12 unids","Ovos Vermelhos","Alho",
@@ -134,6 +72,7 @@ const produtos = [
 "Pimentão Amarelo","Pimentão Verde","Pimentão Vermelho","Quiabo",
 "Rabanete","Repolho Roxo","Repolho Verde CRASA",
 "Tomate Graúdo","Tomate Médio","Tomate Cereja","Vagem",
+
 "--- FRUTAS ---",
 "Abacate","Abacaxi Graúdo","Abacaxi Médio","Ameixa","Atemóia",
 "Banana Figo","Banana Maçã","Banana Nanica","Banana Prata","Banana da Terra",
@@ -146,6 +85,7 @@ const produtos = [
 "Morango","Nectarina","Pera Argentina","Pera Portuguesa",
 "Pêssego Importado","Pêssego Nacional","Pitaya","Poncã","Tangerina",
 "Uva Benitaka","Uva Itália","Uva Niágara","Uva Brasil","Uva Crinson","Uva Thompson","Uva Vitória",
+
 "--- PACOTES ---",
 "Sacolas","Bdj-b1","Bdj-b2","Filme","Bobina","Saquinho","Papel","Redinha"
 ];
@@ -153,23 +93,28 @@ const produtos = [
 let pedido = [];
 let total = JSON.parse(localStorage.getItem("totalDia")) || {};
 
+window.onload = function(){
+const select = document.getElementById("produto");
 produtos.forEach(p=>{
 let opt=document.createElement("option");
 opt.text=p;
 opt.value=p;
 if(p.includes("---")) opt.disabled=true;
-produto.add(opt);
+select.add(opt);
 });
+}
 
 function login(){
-let u=user.value.toLowerCase();
-let p=pass.value;
+let u = document.getElementById("user").value.toLowerCase();
+let p = document.getElementById("pass").value;
+
 if(usuarios[u] && usuarios[u]===p){
-loginCard.classList.add("hidden");
-app.classList.remove("hidden");
-storeTitle.innerText="Loja: "+u;
+document.getElementById("loginCard").classList.add("hidden");
+document.getElementById("app").classList.remove("hidden");
+document.getElementById("storeTitle").innerText="Loja: "+u;
+
 if(u==="admin"){
-adminArea.classList.remove("hidden");
+document.getElementById("adminArea").classList.remove("hidden");
 atualizarTotal();
 }
 }else{
@@ -178,13 +123,14 @@ alert("Login inválido");
 }
 
 function addItem(){
-let prod=produto.value;
+let prod=document.getElementById("produto").value;
 let qtd=parseFloat(document.getElementById("qtd").value);
 if(!qtd || prod.includes("---")) return;
+
 pedido.push({prod,qtd});
 let li=document.createElement("li");
 li.innerText=prod+" - "+qtd;
-lista.appendChild(li);
+document.getElementById("lista").appendChild(li);
 document.getElementById("qtd").value="";
 }
 
@@ -195,15 +141,15 @@ total[item.prod]=(total[item.prod]||0)+item.qtd;
 localStorage.setItem("totalDia",JSON.stringify(total));
 alert("Pedido enviado!");
 pedido=[];
-lista.innerHTML="";
+document.getElementById("lista").innerHTML="";
 }
 
 function atualizarTotal(){
-totalDia.innerHTML="";
+document.getElementById("totalDia").innerHTML="";
 for(let p in total){
 let li=document.createElement("li");
 li.innerText=p+" - "+total[p];
-totalDia.appendChild(li);
+document.getElementById("totalDia").appendChild(li);
 }
 }
 
