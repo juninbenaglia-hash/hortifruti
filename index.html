@@ -1,18 +1,10 @@
-
 <!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Varejão Pag Leve</title>
 
-<body>
-
-<div class="container">
-    <div class="login-box">
-        <h2>Área do Cliente</h2>
-        <input type="text" placeholder="Usuário">
-        <input type="password" placeholder="Senha">
-        <button>Entrar</button>
-    </div>
-</div>
-
-</body>
 <style>
 body {
     margin: 0;
@@ -26,9 +18,9 @@ body {
     align-items: flex-start;
 }
 
-/* Espaço para descer o login */
+/* Desce o login */
 .container {
-    margin-top: 40vh; /* quanto maior, mais pra baixo */
+    margin-top: 40vh;
     width: 100%;
     display: flex;
     justify-content: center;
@@ -47,6 +39,11 @@ body {
     box-shadow: 0 15px 40px rgba(0,0,0,0.5);
 }
 
+.login-box h2 {
+    margin-bottom: 25px;
+    font-weight: 500;
+    letter-spacing: 1px;
+}
 
 input {
     width: 100%;
@@ -80,11 +77,13 @@ button:hover {
 
 <body>
 
-<div class="login-box">
-    <h2>Sistema de Pedidos</h2>
-    <input type="text" placeholder="Usuário">
-    <input type="password" placeholder="Senha">
-    <button>Entrar</button>
+<div class="container">
+    <div class="login-box">
+        <h2>Área do Cliente</h2>
+        <input type="text" placeholder="Usuário">
+        <input type="password" placeholder="Senha">
+        <button>Entrar</button>
+    </div>
 </div>
 
 </body>
