@@ -1,77 +1,164 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html>
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Login - Varejão Pag Leve</title>
-
+<title>Sistema Hortifruti</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
-body {
-    margin: 0;
-    font-family: 'Segoe UI', sans-serif;
-    min-height: 100vh;
-    background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)),
-                url('logo.png') no-repeat center center;
-    background-size: cover;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.login-box {
-    background: rgba(255,255,255,0.08);
-    backdrop-filter: blur(15px);
-    padding: 35px;
-    border-radius: 20px;
-    width: 90%;
-    max-width: 350px;
-    text-align: center;
-    color: white;
-    border: 1px solid rgba(255,255,255,0.2);
-    box-shadow: 0 15px 40px rgba(0,0,0,0.5);
-}
-
-input {
-    width: 100%;
-    padding: 14px;
-    margin: 12px 0;
-    border-radius: 12px;
-    border: none;
-}
-
-button {
-    width: 100%;
-    padding: 14px;
-    border-radius: 12px;
-    border: none;
-    background: linear-gradient(45deg, #56ab2f, #a8e063);
-    color: white;
-    font-weight: bold;
-    cursor: pointer;
-}
+body { font-family: Arial; background:#f2f2f2; margin:0; padding:15px; }
+h2 { text-align:center; }
+.card { background:white; padding:15px; border-radius:10px; margin-bottom:15px; }
+button { padding:10px; width:100%; margin-top:5px; border:none; border-radius:8px; background:#2e7d32; color:white; font-size:16px; }
+input, select { padding:8px; width:100%; margin-top:5px; border-radius:6px; border:1px solid #ccc; }
+.hidden { display:none; }
+.category { margin-top:10px; font-weight:bold; }
+ul { padding-left:15px; }
 </style>
 </head>
-
 <body>
 
-<div class="login-box">
-    <h2>Área do Cliente</h2>
-    <input type="text" id="usuario" placeholder="Usuário">
-    <input type="password" id="senha" placeholder="Senha">
-    <button onclick="login()">Entrar</button>
+<div id="loginCard" class="card">
+<h2>Login</h2>
+<input id="user" placeholder="Usuário">
+<input id="pass" type="password" placeholder="Senha">
+<button onclick="login()">Entrar</button>
+</div>
+
+<div id="app" class="hidden">
+
+<h2 id="storeTitle"></h2>
+
+<div class="card">
+<select id="produto"></select>
+<input id="qtd" type="number" step="0.5" placeholder="Quantidade">
+<button onclick="addItem()">Adicionar</button>
+</div>
+
+<div class="card">
+<h3>Pedido</h3>
+<ul id="lista"></ul>
+<button onclick="enviar()">Enviar Pedido</button>
+</div>
+
+<div id="adminArea" class="card hidden">
+<h3>Total do Dia</h3>
+<ul id="totalDia"></ul>
+<button onclick="limparDia()">Fechar Dia</button>
+</div>
+
 </div>
 
 <script>
-function login() {
-    var user = document.getElementById("usuario").value;
-    var pass = document.getElementById("senha").value;
 
-    if(user === "admin" && pass === "1234") {
-        window.location.href = "painel.html";
-    } else {
-        alert("Usuário ou senha incorretos");
-    }
+const usuarios = {
+borborema:"borborema1",
+itapolis:"itapolis1",
+taquaritinga:"taquaritinga1",
+santaernestina:"santaernestina1",
+dobrada:"dobrada1",
+admin:"admin"
+};
+
+const produtos = [
+
+"--- LEGUMES ---",
+"Abóbora Cabotiá","Abóbora Caipira","Abóbora Menina","Abóbora Moranga","Abóbora Paulista",
+"Acelga","Ovos com 20 unids","Ovos com 12 unids","Ovos Vermelhos","Alho",
+"Batata Doce Roxa","Batata Rosa","Batata Graúda","Batata Média","Batata Pirulito",
+"Berinjela","Beterraba","Beterraba P","Brócolis Ninja","Cará",
+"Cebola cx 4","Cebola cx 3","Cebola cx 2","Cebola Roxa",
+"Cenoura Boa","Cenoura Miúda","Chuchu","Couve-Flor","Gengibre",
+"Inhame","Jiló","Mandioca","Mandioquinha","Milho Verde",
+"Pepino Caipira","Pepino Japonês","Pimenta Americana","Pimenta Ardida","Pimenta Cambuci",
+"Pimentão Amarelo","Pimentão Verde","Pimentão Vermelho","Quiabo",
+"Rabanete","Repolho Roxo","Repolho Verde CRASA",
+"Tomate Graúdo","Tomate Médio","Tomate Cereja","Vagem",
+
+"--- FRUTAS ---",
+"Abacate","Abacaxi Graúdo","Abacaxi Médio","Ameixa","Atemóia",
+"Banana Figo","Banana Maçã","Banana Nanica","Banana Prata","Banana da Terra",
+"Cajú","Caqui Fuiú","Caqui Rama Forte","Coco Seco","Coco Verde","Cereja",
+"Goiaba","Kiwi","Laranja Lima","Laranja Pera Rio","Limão",
+"Maçã Verde","Maçã Argentina","Maçã Fuji","Maçã Gala","Maçã P",
+"Mamão Formosa","Mamão Papaia","Manga Palmer","Manga Tommy",
+"Maracujá","Melancia","Melancia s/ Semente",
+"Melão Amarelo","Melão Cepi","Melão Orange","Melão Rei","Melão Sapo",
+"Morango","Nectarina","Pera Argentina","Pera Portuguesa",
+"Pêssego Importado","Pêssego Nacional","Pitaya","Poncã","Tangerina",
+"Uva Benitaka","Uva Itália","Uva Niágara","Uva Brasil","Uva Crinson","Uva Thompson","Uva Vitória",
+
+"--- PACOTES ---",
+"Sacolas","Bdj-b1","Bdj-b2","Filme","Bobina","Saquinho","Papel","Redinha"
+];
+
+let pedido = [];
+let total = JSON.parse(localStorage.getItem("totalDia")) || {};
+
+produtos.forEach(p=>{
+let opt=document.createElement("option");
+opt.text=p;
+opt.value=p;
+if(p.includes("---")) opt.disabled=true;
+produto.add(opt);
+});
+
+function login(){
+let u=user.value.toLowerCase();
+let p=pass.value;
+if(usuarios[u] && usuarios[u]===p){
+loginCard.classList.add("hidden");
+app.classList.remove("hidden");
+storeTitle.innerText="Loja: "+u;
+if(u==="admin"){
+adminArea.classList.remove("hidden");
+atualizarTotal();
 }
+}else{
+alert("Login inválido");
+}
+}
+
+function addItem(){
+let prod=produto.value;
+let qtd=parseFloat(qtdInput());
+if(!qtd || prod.includes("---")) return;
+pedido.push({prod,qtd});
+let li=document.createElement("li");
+li.innerText=prod+" - "+qtd;
+lista.appendChild(li);
+document.getElementById("qtd").value="";
+}
+
+function qtdInput(){
+return document.getElementById("qtd").value;
+}
+
+function enviar(){
+pedido.forEach(item=>{
+total[item.prod]=(total[item.prod]||0)+item.qtd;
+});
+localStorage.setItem("totalDia",JSON.stringify(total));
+alert("Pedido enviado!");
+pedido=[];
+lista.innerHTML="";
+}
+
+function atualizarTotal(){
+totalDia.innerHTML="";
+for(let p in total){
+let li=document.createElement("li");
+li.innerText=p+" - "+total[p];
+totalDia.appendChild(li);
+}
+}
+
+function limparDia(){
+if(confirm("Fechar dia e zerar tudo?")){
+localStorage.removeItem("totalDia");
+location.reload();
+}
+}
+
 </script>
 
 </body>
